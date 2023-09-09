@@ -28,7 +28,7 @@ class Items:
         else:
             self.pos = torch.tensor(pos, dtype=torch.float32)
 
-    def optimize(self, scene: "Scene" = None, stop_p=1e-3, shuffle=True):
+    def optimize(self, scene: "Scene" = None, stop_p=1e-4, shuffle=True, max_steps=1000):
         prev_loss = [self.get_all_loss()]
         N_history = 100
 
@@ -40,17 +40,19 @@ class Items:
             param.requires_grad = True
         optimizer = torch.optim.Adam(params, lr=self.safe_dist, betas=(0.9, 0.999), eps=1e-8)
 
-        while len(prev_loss) < N_history or np.std(prev_loss) > stop_p * np.average(prev_loss):
+        for i in range(max_steps):
             optimizer.zero_grad()
             loss = self.get_all_loss()
             loss.backward()
             optimizer.step()
 
-            prev_loss += [loss.item()]
-            prev_loss = prev_loss[-N_history:]
-
             if scene is not None:
                 scene.show(self)
+
+            prev_loss += [loss.item()]
+            prev_loss = prev_loss[-N_history:]
+            if len(prev_loss) > N_history and np.std(prev_loss) < stop_p * np.average(prev_loss):
+                break
 
         for param in params:
             param.requires_grad = False
