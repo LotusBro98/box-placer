@@ -1,8 +1,8 @@
 import enum
-from dataclasses import dataclass
-
 import drawsvg as draw
 import numpy as np
+
+from validation.models import Box
 
 
 class Projection(enum.Enum):
@@ -18,17 +18,30 @@ class DrawColor:
     CENTER_OF_MASS_COLOR = "#ff0000"
 
 
-class Box:
+class DrawBox:
     pos: np.ndarray             # meters
     center_of_mass: np.ndarray  # meters, relative to pos
     mass: float                 # kg
     dimensions: np.ndarray      # meters
+    id: int = 0
 
     def __init__(self, pos, center_of_mass, mass, dimensions):
         self.pos = np.array(pos)
         self.center_of_mass = np.array(center_of_mass)
         self.dimensions = np.array(dimensions)
         self.mass = mass
+
+    @staticmethod
+    def from_box(box: Box):
+        if isinstance(box, DrawBox):
+            return box
+
+        return DrawBox(
+            pos=np.array(box.coords_of_cg, dtype=np.float32) / 1000,
+            center_of_mass=np.array([0, 0, 0]),
+            mass=box.weight*1000,
+            dimensions=np.array(box.dimensions, dtype=np.float32) / 1000
+        )
 
     def draw_center(self, scene: "Scene"):
         pos = scene.project(self.pos + self.center_of_mass)
@@ -50,9 +63,20 @@ class Box:
         scene.drawing.append(line1)
         scene.drawing.append(line2)
 
-    # def draw_label(self, scene: "Scene"):
-    #     pos = scene.project(self.pos + self.center_of_mass, projection)
-    #     pos = (self.pos + self.center_of_mass)[np.array(projection.value[0])][:2]
+    def draw_dimension(self, scene: "Scene"):
+        center = scene.project(self.pos)
+        dims = scene.project_size(self.dimensions)
+        left = center[0] - dims[0] / 2
+        right = center[0] + dims[0] / 2
+
+    def draw_label(self, scene: "Scene"):
+        pos = scene.project(self.pos + self.center_of_mass)
+        text = f"ЦТгр{self.id}"
+        offset = np.array([0.1, -0.1]) * scene.scale
+        pos += offset
+        size = 0.2 * scene.scale
+        text_fig = draw.Text(text, size, pos[0], pos[1], stroke=DrawColor.BOX_COLOR, font_family="Arial", font_style="italic")
+        scene.drawing.append(text_fig)
 
     def draw_box(self, scene: "Scene"):
         pos = scene.project(self.pos)
@@ -64,6 +88,7 @@ class Box:
     def draw(self, scene: "Scene"):
         self.draw_box(scene)
         self.draw_center(scene)
+        self.draw_label(scene)
 
 
 class Platform:
@@ -120,7 +145,7 @@ class Scene:
         (Projection.BACK,  [700, -250]),
     ]
 
-    def __init__(self, width, height, scale, path):
+    def __init__(self, width, height, scale, path=None):
         self.drawing = draw.Drawing(width, height, origin='center')
         self.scale = scale
         self.path = path
@@ -152,25 +177,43 @@ class Scene:
         for elem in elems:
             elem.draw(self)
 
-    def draw(self):
+    def draw(self, f=None):
         self.drawing.clear()
         for proj in self.projections:
             self.draw_projection(projection=proj[0], origin=proj[1])
-        self.save()
+        self.save(f)
 
-    def save(self):
-        self.drawing.save_svg(self.path)
+    def save(self, f=None):
+        if f is None:
+            self.drawing.save_svg(self.path)
+        else:
+            self.drawing.as_svg(output_file=f)
 
 
-boxes = [
-    Box(pos=[0.6282564, 0.6489718, 0.91460556/2], center_of_mass=[-0., -0., -0.], dimensions=[0.84325385, 1.878874,   0.91460556], mass=1.0019923),
-    Box(pos=[ 0.469371,  -2.5151227,  0.8584385/2      ], center_of_mass=[-0., -0., -0.], dimensions=[0.60296875, 2.231534,   0.8584385 ], mass=0.9971901),
-    Box(pos=[-0.5457087,   0.60900295,  1.0836259/2       ], center_of_mass=[-0., -0., -0.], dimensions=[1.0683688, 2.0711808, 1.0836259], mass=1.0106633),
-    Box(pos=[-1.1298192e-03,  3.2741010e+00,  1.0053426/2], center_of_mass=[-0., -0., -0.], dimensions=[1.0839309, 2.3033555, 1.0053426], mass=0.98005784),
-    Box(pos=[-0.5369451, -1.9809812,  1.207738/2       ], center_of_mass=[-0., -0., -0.], dimensions=[0.8571644, 2.0065832, 1.207738 ], mass=1.0089228),
-]
+def generate_drawing(boxes: list[Box], f):
+    scene = Scene(2500, 1500, scale=100)
 
-scene = Scene(2500, 1500, scale=100, path="drawing.svg")
-scene.elements += boxes
-scene.elements += [Platform(3, 10, 1)]
-scene.draw()
+    boxes = [DrawBox.from_box(box) for box in boxes]
+    for i, box in enumerate(boxes):
+        box.id = i + 1
+
+    scene.elements += boxes
+    scene.elements += [Platform(3, 10, 1)]
+    scene.draw(f)
+
+
+def main():
+    boxes = [
+        DrawBox(pos=[0.6282564, 0.6489718, 0.91460556 / 2], center_of_mass=[-0., -0., -0.], dimensions=[0.84325385, 1.878874, 0.91460556], mass=1.0019923),
+        DrawBox(pos=[0.469371, -2.5151227, 0.8584385 / 2], center_of_mass=[-0., -0., -0.], dimensions=[0.60296875, 2.231534, 0.8584385], mass=0.9971901),
+        DrawBox(pos=[-0.5457087, 0.60900295, 1.0836259 / 2], center_of_mass=[-0., -0., -0.], dimensions=[1.0683688, 2.0711808, 1.0836259], mass=1.0106633),
+        DrawBox(pos=[-1.1298192e-03, 3.2741010e+00, 1.0053426 / 2], center_of_mass=[-0., -0., -0.], dimensions=[1.0839309, 2.3033555, 1.0053426], mass=0.98005784),
+        DrawBox(pos=[-0.5369451, -1.9809812, 1.207738 / 2], center_of_mass=[-0., -0., -0.], dimensions=[0.8571644, 2.0065832, 1.207738], mass=1.0089228),
+    ]
+
+    with open("drawing.svg", "wt+", encoding="utf-8") as f:
+        generate_drawing(boxes, f)
+
+
+if __name__ == '__main__':
+    main()
