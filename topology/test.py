@@ -15,7 +15,6 @@ def main():
 
     N_items = 7
     items = Items(
-        pos=np.random.uniform(low=-5, high=5, size=(N_items, 3)) * [1, 1, 0],
         mass=np.random.normal(loc=1, scale=0.01, size=(N_items,)),
         bbox=np.stack([
             [[0, 0, 0]] * N_items,

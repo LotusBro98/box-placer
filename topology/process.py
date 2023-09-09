@@ -11,21 +11,29 @@ class Items:
 
     def __init__(
             self,
-            pos: np.ndarray,
             mass: np.ndarray,
             bbox: np.ndarray,
             main_bbox: np.ndarray,
+            pos: np.ndarray = None,
             safe_dist: float = 0.1
     ):
-        self.pos = torch.tensor(pos, dtype=torch.float32)
         self.mass = torch.tensor(mass, dtype=torch.float32)
         self.bbox = torch.tensor(bbox, dtype=torch.float32)
         self.main_bbox = torch.tensor(main_bbox, dtype=torch.float32)
         self.safe_dist = safe_dist
 
-    def optimize(self, scene: "Scene" = None, stop_p=1e-3):
+        if pos is None:
+            self.pos = torch.zeros(len(bbox), 3, dtype=torch.float32)
+            self.shuffle()
+        else:
+            self.pos = torch.tensor(pos, dtype=torch.float32)
+
+    def optimize(self, scene: "Scene" = None, stop_p=1e-3, shuffle=True):
         prev_loss = [self.get_all_loss()]
         N_history = 100
+
+        if shuffle:
+            self.shuffle()
 
         params = [self.pos]
         for param in params:
@@ -66,6 +74,12 @@ class Items:
         loss = loss + 10 * self.center_of_mass().norm()
 
         return loss
+
+    def shuffle(self):
+        pos = torch.randn(self.pos.shape) * torch.tensor([1, 1, 0])
+        pos *= self.main_bbox[1] / 2
+        pos += self.main_bbox[0]
+        self.pos[:] = pos
 
     def get_abs_bbox(self):
         return torch.stack([
