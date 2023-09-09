@@ -30,4 +30,17 @@ def build_items(platform: Carriage, boxes: list[Box]) -> Items:
 
 
 def fill_boxes_positions(items: Items, boxes: list[Box]):
-    pass
+    positions = items.pos.numpy()
+    centers = items.bbox[:, 0].numpy()
+    dimensions = items.bbox[:, 1].numpy()
+    main_bbox = items.main_bbox.numpy()
+
+    # positions - geometrical center, center - relative center of mass
+    positions, centers = positions + centers, -centers
+    positions[..., 2] = dimensions[..., 2] / 2
+    positions[..., 1] = positions[..., 1] - main_bbox[0][1] + main_bbox[1][1] / 2
+    positions = positions[..., [1, 0, 2]] * 1000
+
+    for box, pos in zip(boxes, positions):
+        box.coords_of_cg = tuple(np.int32(pos).tolist())
+        print(box)

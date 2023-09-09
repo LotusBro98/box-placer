@@ -1,6 +1,7 @@
 import numpy as np
 
-from topology.convert import build_items
+from documentgen.drawing import generate_drawing
+from topology.convert import build_items, fill_boxes_positions
 from topology.process import Items
 from topology.display import Scene
 from validation.models import Carriage, Box
@@ -24,6 +25,13 @@ def main():
     items = build_items(platform, boxes)
 
     items.optimize(scene)
+
+    fill_boxes_positions(items, boxes)
+    print(boxes)
+
+    b = generate_drawing(platform, boxes)
+    with open("out.svg", "wb+") as f:
+        f.write(b)
 
 
 if __name__ == '__main__':
