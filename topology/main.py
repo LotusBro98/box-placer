@@ -23,7 +23,7 @@ class Items:
         bbox = self.get_abs_bbox()
 
         dist = torch.abs(bbox[None, :, 0, :] - bbox[:, None, 0, :]) - (bbox[None, :, 1, :] + bbox[:, None, 1, :]) / 2
-        # dist = torch.max(dist, dim=-1).values
+
         dist_max = torch.max(dist, dim=-1).values
         dist_sum = dist.prod(dim=-1)
         dist_far = dist.clip(1e-12, None).square().sum(dim=-1).sqrt()
@@ -35,21 +35,9 @@ class Items:
     def get_main_bbox_dist(self, main_bbox) -> torch.Tensor:
         bbox = self.get_abs_bbox()
 
-        # torch.abs(items.pos[:, 0]) - 5 + items.bbox[:, 1, 0] / 2
         dist = torch.abs(main_bbox[None, 0, :] - bbox[:, 0, :]) - (main_bbox[None, 1, :] - bbox[:, 1, :]) / 2
         dist = torch.max(dist, dim=-1).values
         dist = -dist
-        # print(dist)
-
-        return dist
-
-    def get_center_dist(self) -> torch.Tensor:
-        bbox = self.get_abs_bbox()
-
-        dist = (
-            torch.linalg.norm(bbox[None, :, 0, :] - bbox[:, None, 0, :], dim=-1, ord=2)# -
-            # torch.linalg.norm(bbox[None, :, 1, :] - bbox[:, None, 1, :], dim=-1, ord=3) / 2
-        )
 
         return dist
 
@@ -170,38 +158,26 @@ def main():
     while True:
         optimizer.zero_grad()
         loss = 0
-        loss = loss + items.collision_loss(safe_dist)
-        loss = loss + 10 * items.main_bbox_loss(main_bbox, safe_dist)
-        loss = loss + 1 * items.pos[:, 0].abs()
-        # loss = loss + 10 * items.pos[:, 1].abs()
-        # loss += torch.linalg.norm(items.pos, dim=-1).mean()
 
-        # bad = torch.argwhere((loss > (loss.mean() * 1.1)))[:, 0]
+        # collision
+        loss = loss + items.collision_loss(safe_dist)
+
+        # collision with bounding overall box
+        loss = loss + 10 * items.main_bbox_loss(main_bbox, safe_dist)
+
+        # to stick every box to center axis
+        loss = loss + items.pos[:, 0].abs()
+
         losses = loss / loss.mean()
         loss = loss.mean()
 
-        # print(items.center_of_mass())
+        # stick center of mass to center of platform
         loss = loss + 10 * items.center_of_mass().norm()
 
         loss.backward()
         optimizer.step()
 
-        # print(bad.shape)
-        # with torch.no_grad():
-        #     shift = torch.randn(items.pos[bad].shape) * safe_dist * 5
-        #     shift *= np.array([1, 1, 0])
-        #     items.pos[bad] += shift
-
         scene.show(items, main_bbox, losses)
-
-    with torch.no_grad():
-        pos = items.pos.numpy()
-        center = items.bbox[:, 0].numpy()
-        pos, center = pos + center, -center
-        dims = items.bbox[:, 1].numpy()
-        mass = items.mass.numpy()
-        for i in range(len(items.pos)):
-            print(pos[i], center[i], dims[i], mass[i])
 
 
 if __name__ == '__main__':
