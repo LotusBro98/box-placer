@@ -1,8 +1,6 @@
-{% extends "base.html" %}
-
-{% block content %}
-  <h2>Список грузов заказа №12387 от 9.09.23</h2>
-  <a href="{% url 'shipment_create' %}" class="btn btn-primary btn-sm add-shipment">Добавить груз</a>
+{% block shipment-content %}
+  <h3>Список грузов</h3>
+  <a href="{% url 'shipment_create' order.pk %}" class="btn btn-primary btn-sm btn-with-margin">Добавить груз</a>
   <br/>
 <table class="table table-striped">
     <thead>
@@ -26,7 +24,7 @@
           <td>{{ shipment.weight }}</td>
           <td>{{ shipment.amount }}</td>
           <td>
-             <a href="{% url 'shipment_edit' shipment.pk %}" class="btn btn-info btn-sm">Редактировать</a>
+             <a href="{% url 'shipment_edit' order.pk shipment.pk %}" class="btn btn-info btn-sm">Редактировать</a>
           </td>
         </tr>
       {% empty %}

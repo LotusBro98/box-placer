@@ -26,10 +26,9 @@ from django.urls import path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(pattern_name='order_list', permanent=False)),
-    path('shipments/', ShipmentListView.as_view(), name='shipment_list'),
     path('shipments/<int:pk>/', ShipmentDetailView.as_view(), name='shipment_detail'),
-    path('shipments/create/', ShipmentCreateView.as_view(), name='shipment_create'),
-    path('shipments/<int:pk>/edit/', ShipmentUpdateView.as_view(), name='shipment_edit'),
+    path('orders/<int:order_id>/shipments/create/', ShipmentCreateView.as_view(), name='shipment_create'),
+    path('orders/<int:order_id>/shipments/<int:pk>/edit/', ShipmentUpdateView.as_view(), name='shipment_edit'),
     path('carriages/', CarriageListView.as_view(), name='carriage_list'),
     path('carriages/<int:pk>/', CarriageDetailView.as_view(), name='carriage_detail'),
     path('carriages/create/', CarriageCreateView.as_view(), name='carriage_create'),

@@ -1,7 +1,6 @@
 from validation.models import platform, boxes
 from validation.standarts import calculate_long_max_cg_by_weight, MAX_HEIGHT
 
-print("Габариты грузов: не выходят за пределы")
 
 boxes_weight = round(sum(box.weight for box in boxes), 3)
 l_c_shipments = 0.5 * platform.floor_length - sum(box.weight * box.coords_of_cg[0] for box in boxes) / boxes_weight

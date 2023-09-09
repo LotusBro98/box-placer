@@ -56,8 +56,8 @@ class Carriage(models.Model):
 
 class Order(models.Model):
     name = models.CharField(max_length=200, help_text='Наименование заказа')
-    carriage = models.ForeignKey(Carriage, on_delete=models.CASCADE)
-    created_at = models.DateField(default=timezone.now)
+    carriage = models.ForeignKey(Carriage, on_delete=models.CASCADE, help_text='Тип вагона')
+    created_at = models.DateField(default=timezone.now, help_text='Дата создания заказа')
     shipments = GenericRelation(Shipment)
     primary_key = True
 
