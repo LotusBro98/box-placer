@@ -59,6 +59,7 @@ class Order(models.Model):
     carriage = models.ForeignKey(Carriage, on_delete=models.CASCADE, help_text='Тип вагона')
     created_at = models.DateField(default=timezone.now, help_text='Дата создания заказа')
     shipments = GenericRelation(Shipment)
+    calculation_success = models.BooleanField(default=False)
     primary_key = True
 
     # Metadata

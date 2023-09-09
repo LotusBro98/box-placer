@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>Добавление груза</h2>
+  <h2>{% if shipment.id %}Редактирование груза{% else %}Создание нового груза{% endif %}</h2>
   <form method="post">
     {% csrf_token %}
     {% for field in form %}

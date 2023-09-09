@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if success_message %}
+  <div class="alert alert-success" role="alert">
+    {{ success_message }}
+  </div>
+{% endif %}
   <h2>Заказ: {{ order.name }}</h2>
   <table class="table">
     <tbody>
@@ -14,10 +19,12 @@
       </tr>
     </tbody>
   </table>
-  <a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-primary btn-with-margin"><i class="bi bi-wrench-adjustable"></i> Рассчитать расположение грузов</a>
+  <a href="{% url 'update_shipment_coordinates' order.pk %}" class="btn btn-primary btn-with-margin"><i class="bi bi-wrench-adjustable"></i> Рассчитать расположение грузов</a>
 <br/>
-<a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-success btn-with-margin"><i class="bi bi-download"></i> Сохранить чертёж</a>
-<a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-info btn-with-margin"><i class="bi bi-download"></i> Расчётно-пояснительная записка</a>
+{% if order.calculation_success %}
+  <a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-success btn-with-margin"><i class="bi bi-download"></i> Сохранить чертёж</a>
+  <a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-info btn-with-margin"><i class="bi bi-download"></i> Расчётно-пояснительная записка</a>
+{% endif %}
 {% include "shipment/shipment_list.html" %}
   <a href="{% url 'order_list' %}" class="btn btn-light btn-small"><i class="bi bi-arrow-left"></i> Назад к списку заказов</a>
 {% endblock %}

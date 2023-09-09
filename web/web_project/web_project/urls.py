@@ -20,7 +20,7 @@ from django.views.generic import RedirectView
 
 from web_app.views import CarriageCreateView, CarriageDetailView, CarriageListView, CarriageUpdateView, \
     OrderCreateView, OrderDetailView, OrderListView, OrderUpdateView, ShipmentCreateView, \
-    ShipmentDetailView, ShipmentListView, ShipmentUpdateView, get_order_drawing
+    ShipmentDetailView, ShipmentListView, ShipmentUpdateView, get_order_drawing, update_shipment_coordinates
 from django.urls import path
 
 urlpatterns = [
@@ -28,6 +28,7 @@ urlpatterns = [
     path('', RedirectView.as_view(pattern_name='order_list', permanent=False)),
     path('shipments/<int:pk>/', ShipmentDetailView.as_view(), name='shipment_detail'),
     path('orders/<int:order_id>/shipments/create/', ShipmentCreateView.as_view(), name='shipment_create'),
+    path('orders/<int:pk>/shipments/update-coordinates/', update_shipment_coordinates, name='update_shipment_coordinates'),
     path('orders/<int:order_id>/shipments/<int:pk>/edit/', ShipmentUpdateView.as_view(), name='shipment_edit'),
     path('carriages/', CarriageListView.as_view(), name='carriage_list'),
     path('carriages/<int:pk>/', CarriageDetailView.as_view(), name='carriage_detail'),
@@ -38,5 +39,6 @@ urlpatterns = [
     path('orders/create/', OrderCreateView.as_view(), name='order_create'),
     path('orders/<int:pk>/edit/', OrderUpdateView.as_view(), name='order_edit'),
     path('orders/<int:pk>/drawing/', get_order_drawing, name='get_order_drawing'),
+    path('orders/<int:pk>/validation-report/', get_order_drawing, name='get_order_validation_report'),
     # Другие URL-маршруты вашего приложения...
 ]

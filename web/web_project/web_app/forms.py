@@ -5,7 +5,8 @@ from .models import Shipment, Carriage, Order
 class ShipmentForm(forms.ModelForm):
     class Meta:
         model = Shipment
-        fields = '__all__'
+        fields = ["name", "length", "width", "height", "weight", "order"]
+        # widgets = {'order': forms.HiddenInput()}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +32,7 @@ class CarriageForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = ['name', 'carriage']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
