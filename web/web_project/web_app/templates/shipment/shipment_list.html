@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Список грузов</h2>
+  <a href="{% url 'shipment_create' %}" class="btn btn-primary btn-sm add-shipment">Добавить груз</a>
+  <br/>
+<table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Наименование груза</th>
+        <th>Длина (мм)</th>
+        <th>Ширина (мм)</th>
+        <th>Высота (мм)</th>
+        <th>Вес (кг)</th>
+        <th>Количество (шт)</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for shipment in shipments %}
+        <tr>
+          <td>{{ shipment.name }}</td>
+          <td>{{ shipment.length }}</td>
+          <td>{{ shipment.width }}</td>
+          <td>{{ shipment.height }}</td>
+          <td>{{ shipment.weight }}</td>
+          <td>{{ shipment.amount }}</td>
+          <td>
+            <a href="{% url 'shipment_detail' shipment.pk %}" class="btn btn-info btn-sm">Подробнее</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7">Нет доступных записей.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

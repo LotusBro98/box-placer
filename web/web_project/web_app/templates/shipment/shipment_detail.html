@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Детали груза</h2>
+  <table class="table">
+    <tbody>
+      <tr>
+        <th>Наименование груза:</th>
+        <td>{{ shipment.name }}</td>
+      </tr>
+      <tr>
+        <th>Длина (мм):</th>
+        <td>{{ shipment.length }}</td>
+      </tr>
+      <tr>
+        <th>Ширина (мм):</th>
+        <td>{{ shipment.width }}</td>
+      </tr>
+      <tr>
+        <th>Высота (мм):</th>
+        <td>{{ shipment.height }}</td>
+      </tr>
+      <tr>
+        <th>Вес (кг):</th>
+        <td>{{ shipment.weight }}</td>
+      </tr>
+      <tr>
+        <th>Количество (шт):</th>
+        <td>{{ shipment.amount }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <a href="{% url 'shipment_list' %}" class="btn btn-primary">Назад к списку</a>
+{% endblock %}
