@@ -7,12 +7,21 @@ from topology.display import Scene
 from validation.models import Carriage, Box
 
 
-def main():
-    scene = Scene(
-        np.array([1000, 1000]),
-        np.array([[0, 0], [20, 20]])
-    )
+def calculate_optimal_placement(platform: Carriage, boxes: list[Box], visualise=False):
+    if visualise:
+        scene = Scene(
+            np.array([1000, 1000]),
+            np.array([[0, 0], [20, 20]])
+        )
+    else:
+        scene = None
 
+    items = build_items(platform, boxes)
+    items.optimize(scene)
+    fill_boxes_positions(items, boxes)
+
+
+def main():
     platform = Carriage(floor_length=13300, floor_width=2870, weight=21, height_from_rails=1310,
                         cg_height_from_rails=800, base_length=9720, length_to_cg=6650, s_side_surface_meters=7)
     boxes = [
@@ -22,12 +31,7 @@ def main():
         Box(coords_of_cg=(6930, 0, 1150 / 2), dimensions=(4100, 1720, 1150), weight=1.865),
     ]
 
-    items = build_items(platform, boxes)
-
-    items.optimize(scene)
-
-    fill_boxes_positions(items, boxes)
-    print(boxes)
+    calculate_optimal_placement(platform, boxes, visualise=True)
 
     b = generate_drawing(platform, boxes)
     with open("out.svg", "wb+") as f:
