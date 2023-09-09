@@ -17,7 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from web_app.views import ShipmentCreateView, ShipmentDetailView, ShipmentListView
+from web_app.views import CarriageCreateView, CarriageDetailView, CarriageListView, ShipmentCreateView, \
+    ShipmentDetailView, ShipmentListView
 from django.urls import path
 
 urlpatterns = [
@@ -25,5 +26,8 @@ urlpatterns = [
     path('shipments/', ShipmentListView.as_view(), name='shipment_list'),
     path('shipments/<int:pk>/', ShipmentDetailView.as_view(), name='shipment_detail'),
     path('shipments/create/', ShipmentCreateView.as_view(), name='shipment_create'),
+    path('carriages/', CarriageListView.as_view(), name='carriage_list'),
+    path('carriages/<int:pk>/', CarriageDetailView.as_view(), name='carriage_detail'),
+    path('carriages/create/', CarriageCreateView.as_view(), name='carriage_create'),
     # Другие URL-маршруты вашего приложения...
 ]

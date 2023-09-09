@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Детали вагона</h2>
+  <table class="table">
+    <tbody>
+      <tr>
+        <th>Наименование вагона:</th>
+        <td>{{ carriage.name }}</td>
+      </tr>
+      <tr>
+        <th>Длина пола (мм):</th>
+        <td>{{ carriage.floor_length }}</td>
+      </tr>
+      <tr>
+        <th>Ширина пола (мм):</th>
+        <td>{{ carriage.floor_width }}</td>
+      </tr>
+      <tr>
+        <th>Масса тары (т):</th>
+        <td>{{ carriage.weight }}</td>
+      </tr>
+      <tr>
+        <th>Высота пола от УГР (мм):</th>
+        <td>{{ carriage.height_from_rails }}</td>
+      </tr>
+      <tr>
+        <th>Высота центра тяжести от УГР (мм):</th>
+        <td>{{ carriage.cg_height_from_rails }}</td>
+      </tr>
+      <tr>
+        <th>База платформы (мм):</th>
+        <td>{{ carriage.base_length }}</td>
+      </tr>
+      <tr>
+        <th>Площадь наветренной поверхности (м²):</th>
+        <td>{{ carriage.s_side_surface_meters }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <a href="{% url 'carriage_list' %}" class="btn btn-primary">Назад к списку</a>
+{% endblock %}
