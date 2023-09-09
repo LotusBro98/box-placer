@@ -1,8 +1,11 @@
 import enum
+import shutil
+from io import StringIO
+
 import drawsvg as draw
 import numpy as np
 
-from validation.models import Box
+from validation.models import Box, Carriage
 
 
 class Projection(enum.Enum):
@@ -32,16 +35,18 @@ class DrawBox:
         self.mass = mass
 
     @staticmethod
-    def from_box(box: Box):
+    def from_box(box: Box, platform: Carriage):
         if isinstance(box, DrawBox):
             return box
 
-        return DrawBox(
-            pos=np.array(box.coords_of_cg, dtype=np.float32) / 1000,
+        drawbox = DrawBox(
+            pos=np.array(box.coords_of_cg, dtype=np.float32)[[1, 0, 2]] / 1000,
             center_of_mass=np.array([0, 0, 0]),
             mass=box.weight*1000,
-            dimensions=np.array(box.dimensions, dtype=np.float32) / 1000
+            dimensions=np.array(box.dimensions, dtype=np.float32)[[1, 0, 2]] / 1000
         )
+        drawbox.pos[1] = platform.floor_length / 1000 / 2 - drawbox.pos[1]
+        return drawbox
 
     def draw_center(self, scene: "Scene"):
         pos = scene.project(self.pos + self.center_of_mass)
@@ -95,23 +100,33 @@ class Platform:
     pos = np.array([0, 0, -0.1])
     dimensions: np.ndarray
 
-    side_points = np.array([
-        [-0.5, 0], [0.5, 0], [0.5, 0.5], [0.3, 0.5], [0.2, 1], [-0.2, 1], [-0.3, 0.5], [-0.5, 0.5]
-    ])
-    top_points = np.array([
-        [-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]
-    ])
-    front_points = np.array([
-        [-0.5, 0], [0.5, 0], [0.5, 1], [-0.5, 1]
-    ])
+    side_points = np.array([[-0.5, 0], [0.5, 0], [0.5, 0.3], [0.25, 0.3], [0.15, 0.6], [-0.15, 0.6], [-0.25, 0.3], [-0.5, 0.3]])
+    top_points = np.array([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]])
+    front_points = np.array([[-0.5, 0], [0.5, 0], [0.5, 0.3], [-0.5, 0.3]])
+    front_wheel1 = np.array([[-0.3, 0.3], [-0.2, 0.3], [-0.2, 1], [-0.3, 1]])
+    front_wheel2 = np.array([[0.3, 0.3], [0.2, 0.3], [0.2, 1], [0.3, 1]])
+    side_wheels = np.array([[-0.43, 0.65], [-0.30, 0.65], [0.30, 0.65], [0.43, 0.65]])
 
     def __init__(self, wx, wy, wz):
         self.dimensions = np.array([wx, wy, wz])
 
+    @staticmethod
+    def from_carriage(carriage: Carriage):
+        return Platform(
+            wx=carriage.floor_width / 1000,
+            wy=carriage.floor_length / 1000,
+            wz=carriage.height_from_rails / 1000
+        )
+
     def draw_side(self, scene: "Scene"):
         dims = scene.project_size(self.dimensions)
         pts = self.side_points * dims + scene.origin
+        pts_wheels = self.side_wheels * dims + scene.origin
+        wheel_radius = 0.35 * dims[1]
         polygon = draw.Lines(*pts.reshape((-1,)).tolist(), close=True, stroke=DrawColor.PLATFORM_COLOR, fill="white")
+        for pt in pts_wheels:
+            wheel = draw.Circle(pt[0], pt[1], wheel_radius, stroke=DrawColor.PLATFORM_COLOR, fill="white")
+            scene.drawing.append(wheel)
         scene.drawing.append(polygon)
 
     def draw_top(self, scene: "Scene"):
@@ -123,8 +138,14 @@ class Platform:
     def draw_front(self, scene: "Scene"):
         dims = scene.project_size(self.dimensions)
         pts = self.front_points * dims + scene.origin
+        pts_wheel1 = self.front_wheel1 * dims + scene.origin
+        pts_wheel2 = self.front_wheel2 * dims + scene.origin
         polygon = draw.Lines(*pts.reshape((-1,)).tolist(), close=True, stroke=DrawColor.PLATFORM_COLOR, fill="white")
+        polygon_wheel1 = draw.Lines(*pts_wheel1.reshape((-1,)).tolist(), close=True, stroke=DrawColor.PLATFORM_COLOR, fill="white")
+        polygon_wheel2 = draw.Lines(*pts_wheel2.reshape((-1,)).tolist(), close=True, stroke=DrawColor.PLATFORM_COLOR, fill="white")
         scene.drawing.append(polygon)
+        scene.drawing.append(polygon_wheel1)
+        scene.drawing.append(polygon_wheel2)
 
     def draw(self, scene: "Scene"):
         draw_fns = {
@@ -139,8 +160,8 @@ class Platform:
 
 class Scene:
     projections = [
-        (Projection.SIDE,  [-600, -250]),
-        (Projection.TOP,   [-600, 250]),
+        (Projection.SIDE,  [-500, -250]),
+        (Projection.TOP,   [-500, 250]),
         (Projection.FRONT, [700, 250]),
         (Projection.BACK,  [700, -250]),
     ]
@@ -190,29 +211,37 @@ class Scene:
             self.drawing.as_svg(output_file=f)
 
 
-def generate_drawing(boxes: list[Box], f):
+def generate_drawing(carriage: Carriage, boxes: list[Box]) -> StringIO:
     scene = Scene(2500, 1500, scale=100)
 
-    boxes = [DrawBox.from_box(box) for box in boxes]
+    boxes = [DrawBox.from_box(box, carriage) for box in boxes]
     for i, box in enumerate(boxes):
         box.id = i + 1
 
+    platform = Platform.from_carriage(carriage)
+
     scene.elements += boxes
-    scene.elements += [Platform(3, 10, 1)]
+    scene.elements += [platform]
+
+    f = StringIO()
     scene.draw(f)
+    return f
 
 
 def main():
+    platform = Carriage(floor_length=13300, floor_width=2870, weight=21, height_from_rails=1310,
+                        cg_height_from_rails=800, base_length=9720, length_to_cg=6650, s_side_surface_meters=7)
     boxes = [
-        DrawBox(pos=[0.6282564, 0.6489718, 0.91460556 / 2], center_of_mass=[-0., -0., -0.], dimensions=[0.84325385, 1.878874, 0.91460556], mass=1.0019923),
-        DrawBox(pos=[0.469371, -2.5151227, 0.8584385 / 2], center_of_mass=[-0., -0., -0.], dimensions=[0.60296875, 2.231534, 0.8584385], mass=0.9971901),
-        DrawBox(pos=[-0.5457087, 0.60900295, 1.0836259 / 2], center_of_mass=[-0., -0., -0.], dimensions=[1.0683688, 2.0711808, 1.0836259], mass=1.0106633),
-        DrawBox(pos=[-1.1298192e-03, 3.2741010e+00, 1.0053426 / 2], center_of_mass=[-0., -0., -0.], dimensions=[1.0839309, 2.3033555, 1.0053426], mass=0.98005784),
-        DrawBox(pos=[-0.5369451, -1.9809812, 1.207738 / 2], center_of_mass=[-0., -0., -0.], dimensions=[0.8571644, 2.0065832, 1.207738], mass=1.0089228),
+        Box(coords_of_cg=(3055, 0, 1500 / 2), dimensions=(3650, 3320, 1500), weight=6.670),
+        Box(coords_of_cg=(10915, 0, 1020 / 2), dimensions=(3870, 2890, 1020), weight=4.085),
+        Box(coords_of_cg=(690, 0, 390 / 2), dimensions=(1080, 1580, 390), weight=0.395),
+        Box(coords_of_cg=(6930, 0, 1150 / 2), dimensions=(4100, 1720, 1150), weight=1.865),
     ]
 
+    f_bytes = generate_drawing(platform, boxes)
     with open("drawing.svg", "wt+", encoding="utf-8") as f:
-        generate_drawing(boxes, f)
+        f_bytes.seek(0)
+        shutil.copyfileobj(f_bytes, f)
 
 
 if __name__ == '__main__':
