@@ -1,6 +1,6 @@
 import enum
 import shutil
-from io import StringIO
+from io import StringIO, BytesIO
 
 import drawsvg as draw
 import numpy as np
@@ -211,7 +211,7 @@ class Scene:
             self.drawing.as_svg(output_file=f)
 
 
-def generate_drawing(carriage: Carriage, boxes: list[Box]) -> StringIO:
+def generate_drawing(carriage: Carriage, boxes: list[Box]) -> BytesIO:
     scene = Scene(2500, 1500, scale=100)
 
     boxes = [DrawBox.from_box(box, carriage) for box in boxes]
@@ -223,9 +223,15 @@ def generate_drawing(carriage: Carriage, boxes: list[Box]) -> StringIO:
     scene.elements += boxes
     scene.elements += [platform]
 
-    f = StringIO()
-    scene.draw(f)
-    return f
+    sio = StringIO()
+    scene.draw(sio)
+    sio.seek(0)
+
+    b = sio.read().encode()
+    bio = BytesIO()
+    bio.write(b)
+
+    return bio
 
 
 def main():
@@ -239,7 +245,7 @@ def main():
     ]
 
     f_bytes = generate_drawing(platform, boxes)
-    with open("drawing.svg", "wt+", encoding="utf-8") as f:
+    with open("drawing.svg", "wb+") as f:
         f_bytes.seek(0)
         shutil.copyfileobj(f_bytes, f)
 
