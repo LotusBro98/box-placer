@@ -106,8 +106,14 @@ class Scene:
         pt = np.int32(pt)
         cv.putText(image, text, pt, cv.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
-    # def draw_point(self, point, image, color):
-    #     cv.drawMarker(image, )
+    def draw_point(self, point, image, color):
+        pt = point[:2].copy()
+        pt -= self.viewport[0]
+        pt /= self.viewport[1]
+        pt += 0.5
+        pt *= self.size
+        pt = np.int32(pt)
+        cv.drawMarker(image, pt, color, markerType=cv.MARKER_CROSS, markerSize=20)
 
     @torch.no_grad()
     def draw_items(self, image, items: Items, losses):
@@ -117,14 +123,16 @@ class Scene:
             self.draw_bbox(bbox, image, (0, 255, 0))
             self.draw_text(bbox[0] - bbox[1]*(0.5, 0, 0), f"{losses[i]:.3f}", image, (0, 0, 255))
 
-    # @torch.no_grad()
-    # def draw_center_of_mass(self, items: Items):
-    #     com = items.center_of_mass()
+    @torch.no_grad()
+    def draw_center_of_mass(self, image, items: Items):
+        com = items.center_of_mass().numpy()
+        self.draw_point(com, image, (255, 0, 0))
 
     def show(self, items: Items, main_bbox, losses):
         image = np.zeros(tuple(self.size[::-1]) + (3,), dtype=np.uint8)
         self.draw_items(image, items, losses)
         self.draw_bbox(main_bbox.numpy(), image, (0, 0, 255))
+        self.draw_center_of_mass(image, items)
         cv.imshow("Scene", image)
         cv.waitKey(1)
 
