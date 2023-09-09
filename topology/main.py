@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import cv2 as cv
 
-torch.autograd.set_detect_anomaly(True)
+
 class Items:
     pos: torch.Tensor     # (N, 3) positions of center of mass
     mass: torch.Tensor    # (N,) masses in kg
@@ -140,10 +140,10 @@ def main():
 
     main_bbox = torch.tensor([
         [0, 0, 0],
-        [10, 10, 10]
+        [3, 10, 10]
     ], dtype=torch.float32)
 
-    N_items = 30
+    N_items = 7
     items = Items(
         pos=np.random.uniform(low=-5, high=5, size=(N_items, 3)) * [1, 1, 0],
         mass=np.random.normal(loc=1, scale=0.01, size=(N_items,)),
@@ -159,10 +159,7 @@ def main():
     safe_dist = 0.1
     optimizer = torch.optim.Adam(params, lr=safe_dist, betas=(0.9, 0.999), eps=1e-8)
 
-    i = 0
     while True:
-        i += 1
-
         optimizer.zero_grad()
         loss = 0
         loss = loss + items.collision_loss(safe_dist)
@@ -175,7 +172,7 @@ def main():
         losses = loss / loss.mean()
         loss = loss.mean()
 
-        print(items.center_of_mass())
+        # print(items.center_of_mass())
         loss = loss + 10 * items.center_of_mass().norm()
 
         loss.backward()
@@ -188,6 +185,15 @@ def main():
         #     items.pos[bad] += shift
 
         scene.show(items, main_bbox, losses)
+
+    with torch.no_grad():
+        pos = items.pos.numpy()
+        center = items.bbox[:, 0].numpy()
+        pos, center = pos + center, -center
+        dims = items.bbox[:, 1].numpy()
+        mass = items.mass.numpy()
+        for i in range(len(items.pos)):
+            print(pos[i], center[i], dims[i], mass[i])
 
 
 if __name__ == '__main__':
