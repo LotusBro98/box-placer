@@ -211,7 +211,7 @@ class Scene:
             self.drawing.as_svg(output_file=f)
 
 
-def generate_drawing(carriage: Carriage, boxes: list[Box]) -> BytesIO:
+def generate_drawing(carriage: Carriage, boxes: list[Box]) -> bytes:
     scene = Scene(2500, 1500, scale=100)
 
     boxes = [DrawBox.from_box(box, carriage) for box in boxes]
@@ -226,12 +226,8 @@ def generate_drawing(carriage: Carriage, boxes: list[Box]) -> BytesIO:
     sio = StringIO()
     scene.draw(sio)
     sio.seek(0)
-
     b = sio.read().encode()
-    bio = BytesIO()
-    bio.write(b)
-
-    return bio
+    return b
 
 
 def main():
