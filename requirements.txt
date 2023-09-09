@@ -1,0 +1,4 @@
+torch
+django
+drawsvg
+opencv-python

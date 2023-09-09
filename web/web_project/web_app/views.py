@@ -5,6 +5,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from documentgen.drawing import generate_drawing
+from topology.main import calculate_optimal_placement
 from .forms import CarriageForm, OrderForm, ShipmentForm
 from .models import Carriage, Order, Shipment
 
@@ -115,10 +116,20 @@ class OrderUpdateView(UpdateView):
 
 def update_shipment_coordinates(request, pk: int):
     order = Order.objects.get(pk=pk)
+    shipments_data = list(Shipment.objects.filter(order=order))
+    # Input for calculator:
+    boxes = [shipment.to_box for shipment in shipments_data]
+    carriage = order.carriage.to_base_model
+    calculate_optimal_placement(platform=carriage, boxes=boxes)
+    # Save output of calculator:
+    for index, box in enumerate(boxes):
+        shipments_data[index].update_coords_from_box(box)
+        shipments_data[index].save()
+    order = Order.objects.get(pk=pk)
     order.calculation_success = True
     order.save()
     request.session['success_message'] = "Координаты размещения грузов на платформе были успешно пересчитаны!"
-    return redirect(reverse('order_detail', kwargs={ 'pk': pk }))
+    return redirect(reverse('order_detail', kwargs={'pk': pk}))
 
 
 def get_order_drawing(request, pk: int):
@@ -132,7 +143,7 @@ def get_order_drawing(request, pk: int):
     file_to_send = ContentFile(file)
     response = HttpResponse(file_to_send, 'image/svg+xml')
     response['Content-Length'] = file_to_send.size
-    response['Content-Disposition'] = 'attachment; filename="somefile.svg"'
+    response['Content-Disposition'] = f'attachment; filename="{order.name}.svg"'
     return response
 
 

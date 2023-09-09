@@ -29,6 +29,9 @@ class Shipment(models.Model):
     def to_box(self) -> BoxBase:
         return BoxBase(dimensions=(int(self.length), int(self.width), int(self.height)), weight=float(self.weight), coords_of_cg=tuple(int(v) for v in (self.coords_of_cg.split(",") or [])))
 
+    def update_coords_from_box(self, box: BoxBase) -> None:
+        self.coords_of_cg = ",".join(str(coord) for coord in box.coords_of_cg)
+
 
 class Carriage(models.Model):
     name = models.CharField(max_length=200, help_text='Наименование вагона')
