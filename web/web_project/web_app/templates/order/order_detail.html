@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Заказ: {{ order.name }}</h2>
+  <table class="table">
+    <tbody>
+      <tr>
+        <th>Вагон:</th>
+        <td>{{ order.carriage }}</td>
+      </tr>
+      <tr>
+        <th>Дата создания:</th>
+        <td>{{ order.created_at }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <a href="{% url 'order_list' %}" class="btn btn-primary">Назад к списку</a>
+  <a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-primary">Рассчитать расположение грузов</a>
+<br/>
+<a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-secondary">Сохранить чертёж</a>
+
+{% endblock %}

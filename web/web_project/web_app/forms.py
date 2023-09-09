@@ -1,5 +1,5 @@
 from django import forms
-from .models import Shipment, Carriage
+from .models import Shipment, Carriage, Order
 
 
 class ShipmentForm(forms.ModelForm):
@@ -26,3 +26,9 @@ class CarriageForm(forms.ModelForm):
         # Установить label каждого поля равным его help_text
         for field_name, field in self.fields.items():
             field.label = field.help_text
+
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = '__all__'

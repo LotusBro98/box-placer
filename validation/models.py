@@ -8,9 +8,9 @@ class Shipment:
 
 @dataclass
 class Box(Shipment):
-    coords_of_cg: tuple[int, int, int]  # in millimeters. Coords of C.G. относительно торцевого борта
     dimensions: tuple[int, int, int]  # in millimeters
     weight: float  # in tons
+    coords_of_cg: tuple[int, int, int] = (0, 0, 0)  # in millimeters. Coords of C.G. относительно торцевого борта
 
     @property
     def h_of_cg(self):

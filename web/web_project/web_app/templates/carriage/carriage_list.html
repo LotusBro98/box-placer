@@ -29,7 +29,7 @@
           <td>{{ carriage.base_length }}</td>
           <td>{{ carriage.s_side_surface_meters }}</td>
           <td>
-            <a href="{% url 'carriage_detail' carriage.pk %}" class="btn btn-info btn-sm">Подробнее</a>
+             <a href="{% url 'carriage_edit' carriage.pk %}" class="btn btn-info btn-sm">Редактировать</a>
           </td>
         </tr>
       {% empty %}

@@ -23,7 +23,7 @@ h_shipments_overall = sum(box.weight * (box.h_of_cg + platform.height_from_rails
 # print(
 #     f"h_shipments_overall = sum({' + '.join(f'{box.weight}*({box.h_of_cg}+{platform.height_from_rails})' for box in boxes)}/{sum(box.weight for box in boxes)}")
 print(
-    f"2. Общая высота ЦТ грузов в вагоне: H_ct = sum({' + '.join(f'{box.weight}*{box.h_of_cg + platform.height_from_rails}' for box in boxes)}/{sum(box.weight for box in boxes)}"
+    f"2. Общая высота ЦТ грузов в вагоне: H_ct = sum({' + '.join(f'{box.weight}*{box.h_of_cg + platform.height_from_rails}' for box in boxes)}/{boxes_weight}"
     f"\n = {round(h_shipments_overall)}мм < {MAX_HEIGHT}")
 print()
 h_overall = (sum(box.weight * (box.h_of_cg + platform.height_from_rails) for box in

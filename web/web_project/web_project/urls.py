@@ -16,18 +16,28 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import RedirectView
 
-from web_app.views import CarriageCreateView, CarriageDetailView, CarriageListView, ShipmentCreateView, \
-    ShipmentDetailView, ShipmentListView
+from web_app.views import CarriageCreateView, CarriageDetailView, CarriageListView, CarriageUpdateView, \
+    OrderCreateView, OrderDetailView, OrderListView, OrderUpdateView, ShipmentCreateView, \
+    ShipmentDetailView, ShipmentListView, ShipmentUpdateView, get_order_drawing
 from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', RedirectView.as_view(pattern_name='order_list', permanent=False)),
     path('shipments/', ShipmentListView.as_view(), name='shipment_list'),
     path('shipments/<int:pk>/', ShipmentDetailView.as_view(), name='shipment_detail'),
     path('shipments/create/', ShipmentCreateView.as_view(), name='shipment_create'),
+    path('shipments/<int:pk>/edit/', ShipmentUpdateView.as_view(), name='shipment_edit'),
     path('carriages/', CarriageListView.as_view(), name='carriage_list'),
     path('carriages/<int:pk>/', CarriageDetailView.as_view(), name='carriage_detail'),
     path('carriages/create/', CarriageCreateView.as_view(), name='carriage_create'),
+    path('carriages/<int:pk>/edit/', CarriageUpdateView.as_view(), name='carriage_edit'),
+    path('orders/', OrderListView.as_view(), name='order_list'),
+    path('orders/<int:pk>/', OrderDetailView.as_view(), name='order_detail'),
+    path('orders/create/', OrderCreateView.as_view(), name='order_create'),
+    path('orders/<int:pk>/edit/', OrderUpdateView.as_view(), name='order_edit'),
+    path('orders/<int:pk>/drawing/', get_order_drawing, name='get_order_drawing'),
     # Другие URL-маршруты вашего приложения...
 ]

@@ -26,7 +26,7 @@
           <td>{{ shipment.weight }}</td>
           <td>{{ shipment.amount }}</td>
           <td>
-            <a href="{% url 'shipment_detail' shipment.pk %}" class="btn btn-info btn-sm">Подробнее</a>
+             <a href="{% url 'shipment_edit' shipment.pk %}" class="btn btn-info btn-sm">Редактировать</a>
           </td>
         </tr>
       {% empty %}
