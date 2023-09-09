@@ -143,13 +143,13 @@ def main():
         [10, 10, 10]
     ], dtype=torch.float32)
 
-    N_items = 20
+    N_items = 30
     items = Items(
         pos=np.random.uniform(low=-5, high=5, size=(N_items, 3)) * [1, 1, 0],
         mass=np.random.normal(loc=1, scale=0.01, size=(N_items,)),
         bbox=np.stack([
             [[0, 0, 0]] * N_items,
-            np.random.normal(loc=(1, 2, 1), scale=0.001, size=(N_items, 3))
+            np.random.normal(loc=(1, 2, 1), scale=0.2, size=(N_items, 3))
         ], axis=-2)
     )
     params = [items.pos]
@@ -166,12 +166,12 @@ def main():
         optimizer.zero_grad()
         loss = 0
         loss = loss + items.collision_loss(safe_dist)
-        loss = loss + 1 * items.main_bbox_loss(main_bbox, safe_dist)
+        loss = loss + 10 * items.main_bbox_loss(main_bbox, safe_dist)
         loss = loss + 1 * items.pos[:, 0].abs()
         # loss = loss + 10 * items.pos[:, 1].abs()
         # loss += torch.linalg.norm(items.pos, dim=-1).mean()
 
-        bad = torch.argwhere((loss > (loss.mean() * 1.1)))[:, 0]
+        # bad = torch.argwhere((loss > (loss.mean() * 1.1)))[:, 0]
         losses = loss / loss.mean()
         loss = loss.mean()
 
@@ -181,11 +181,11 @@ def main():
         loss.backward()
         optimizer.step()
 
-        print(bad.shape)
-        with torch.no_grad():
-            shift = torch.randn(items.pos[bad].shape) * safe_dist * 5
-            shift *= np.array([1, 1, 0])
-            items.pos[bad] += shift
+        # print(bad.shape)
+        # with torch.no_grad():
+        #     shift = torch.randn(items.pos[bad].shape) * safe_dist * 5
+        #     shift *= np.array([1, 1, 0])
+        #     items.pos[bad] += shift
 
         scene.show(items, main_bbox, losses)
 
