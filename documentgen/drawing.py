@@ -94,10 +94,22 @@ class DrawBox:
         size = int((right - left) / scene.scale * 1000)
         height = scene.project(np.array([0, 0, self.pos[2] + 2]))[1]
 
-        line = draw.Line(left, height, right, height, stroke=DrawColor.PLATFORM_COLOR, stroke_width=1)
-        scene.drawing.append(line)
+        scene.drawing.append(draw.Line(
+            left, height, right, height,
+            stroke=DrawColor.PLATFORM_COLOR, stroke_width=1
+        ))
 
-        draw_label(scene, [center[0], height], f"{size}", DrawColor.PLATFORM_COLOR, style="normal")
+        scene.drawing.append(draw.Line(
+            left, center[1], left, height - 0.2 * scene.scale,
+            stroke=DrawColor.PLATFORM_COLOR, stroke_width=0.5
+        ))
+
+        scene.drawing.append(draw.Line(
+            right, center[1], right, height - 0.2 * scene.scale,
+            stroke=DrawColor.PLATFORM_COLOR, stroke_width=0.5
+        ))
+
+        draw_label(scene, [center[0] - 0.2 * scene.scale, height], f"{size}", DrawColor.PLATFORM_COLOR, style="normal")
 
     def draw_dimension(self, scene: "Scene"):
         draw_fns = {
