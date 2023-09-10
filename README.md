@@ -1,3 +1,7 @@
+### Operating System
+- Windows - tested
+- Linux - tested
+
 ### Setup environment:
 1. Create virtualenv
 2. `pip install -r requirements.txt`
