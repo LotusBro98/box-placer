@@ -119,7 +119,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 # Директория, где хранятся ваши статические файлы в проекте
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'web_app/static'),
 ]
 
 # Default primary key field type
