@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 from validation.formulas import calculate_formulas
-# from validation.formulas import l_c_shipments_calculation
 from validation.models import Box, Carriage
+from validation.standarts import MAX_HEIGHT
+
 
 # latex_formula = r'$l_c = 0.5*L - \frac{\sum Q_i*l_i}{\sum Q_i}$'
 
@@ -48,6 +49,7 @@ def _generate_pdf_figure(order, boxes: list[Box], carriage: Carriage) -> None:
     current_row_height = add_text(ax, "2. Общая высота ЦТ:", current_row_height=current_row_height)
     current_row_height = add_formula(ax, r'$H_цт = \frac{\sum Q_i*h_i}{\sum Q_i}$', current_row_height=current_row_height)
     current_row_height = add_text(ax, "= " +report.h_shipments_overall_calculation, current_row_height=current_row_height)
+    current_row_height = add_text(ax, "Высота ЦТ грузов в вагоне: " + ("соблюдается" if report.h_shipments_overall < MAX_HEIGHT else "не соблюдается"), current_row_height=current_row_height)
 
     current_row_height = add_text(ax, "3. Устойчивость грузов с вагоном:", current_row_height=current_row_height)
     current_row_height = add_text(ax, "3.1. Общая высота ЦТ:", current_row_height=current_row_height)
@@ -55,7 +57,7 @@ def _generate_pdf_figure(order, boxes: list[Box], carriage: Carriage) -> None:
     current_row_height = add_text(ax, "= " +report.h_overall_calculation, current_row_height=current_row_height)
 
     current_row_height = add_text(ax, "3.2. Расчёт наветреной поверхности:", current_row_height=current_row_height)
-    current_row_height = add_formula(ax, r'$S_бок = \sum S_i$ + S_в', current_row_height=current_row_height)
+    current_row_height = add_formula(ax, r'$S_{бок} = \sum S_i$ + S_в', current_row_height=current_row_height)
     current_row_height = add_text(ax, "= " +report.s_side_surface_calculation, current_row_height=current_row_height)
     current_row_height = add_text(ax, ("Требуется ли проверка поперечной устойчивости груженого вагона: "+  "требуется" if report.is_transverse_need_check else "не требуется"), current_row_height=current_row_height)
 
