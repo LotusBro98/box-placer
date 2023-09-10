@@ -5,6 +5,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from documentgen.drawing import generate_drawing
+from documentgen.validation_report import generate_pdf_report_bytes
 from topology.main import calculate_optimal_placement
 from .forms import CarriageForm, OrderForm, ShipmentForm
 from .models import Carriage, Order, Shipment
@@ -143,7 +144,8 @@ def get_order_drawing(request, pk: int):
     file_to_send = ContentFile(file)
     response = HttpResponse(file_to_send, 'image/svg+xml')
     response['Content-Length'] = file_to_send.size
-    response['Content-Disposition'] = f'attachment; filename="{order.name}.svg"'
+    print(order.name)
+    response['Content-Disposition'] = f'attachment; filename="result-drawing.svg"'
     return response
 
 
@@ -154,9 +156,9 @@ def get_order_validation_report(request, pk: int):
     boxes = [shipment.to_box for shipment in shipments_data]
     carriage = order.carriage.to_base_model
     # Output of drawer:
-    file = generate_drawing(boxes=boxes, carriage=carriage)
+    file = generate_pdf_report_bytes(boxes=boxes, carriage=carriage)
     file_to_send = ContentFile(file)
-    response = HttpResponse(file_to_send, 'image/svg+xml')
+    response = HttpResponse(file_to_send, 'application/x-pdf')
     response['Content-Length'] = file_to_send.size
-    response['Content-Disposition'] = 'attachment; filename="somefile.svg"'
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
     return response

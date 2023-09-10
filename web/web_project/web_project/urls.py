@@ -20,7 +20,8 @@ from django.views.generic import RedirectView
 
 from web_app.views import CarriageCreateView, CarriageDetailView, CarriageListView, CarriageUpdateView, \
     OrderCreateView, OrderDetailView, OrderListView, OrderUpdateView, ShipmentCreateView, \
-    ShipmentDetailView, ShipmentListView, ShipmentUpdateView, get_order_drawing, update_shipment_coordinates
+    ShipmentDetailView, ShipmentUpdateView, get_order_drawing, get_order_validation_report, \
+    update_shipment_coordinates
 from django.urls import path
 
 urlpatterns = [
@@ -39,6 +40,6 @@ urlpatterns = [
     path('orders/create/', OrderCreateView.as_view(), name='order_create'),
     path('orders/<int:pk>/edit/', OrderUpdateView.as_view(), name='order_edit'),
     path('orders/<int:pk>/drawing/', get_order_drawing, name='get_order_drawing'),
-    path('orders/<int:pk>/validation-report/', get_order_drawing, name='get_order_validation_report'),
+    path('orders/<int:pk>/validation-report/', get_order_validation_report, name='get_order_validation_report'),
     # Другие URL-маршруты вашего приложения...
 ]

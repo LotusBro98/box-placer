@@ -23,7 +23,7 @@
 <br/>
 {% if order.calculation_success %}
   <a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-success btn-with-margin"><i class="bi bi-download"></i> Сохранить чертёж</a>
-  <a href="{% url 'get_order_drawing' order.pk %}" class="btn btn-info btn-with-margin"><i class="bi bi-download"></i> Расчётно-пояснительная записка</a>
+  <a href="{% url 'get_order_validation_report' order.pk %}" class="btn btn-info btn-with-margin"><i class="bi bi-download"></i> Расчётно-пояснительная записка</a>
 {% endif %}
 {% include "shipment/shipment_list.html" %}
   <a href="{% url 'order_list' %}" class="btn btn-light btn-small"><i class="bi bi-arrow-left"></i> Назад к списку заказов</a>

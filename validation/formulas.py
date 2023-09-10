@@ -5,9 +5,10 @@ from validation.standarts import calculate_long_max_cg_by_weight, MAX_HEIGHT
 boxes_weight = round(sum(box.weight for box in boxes), 3)
 l_c_shipments = 0.5 * platform.floor_length - sum(box.weight * box.coords_of_cg[0] for box in boxes) / boxes_weight
 max_permissible_l_c_shipments = calculate_long_max_cg_by_weight(boxes_weight)
-print(f"1. Смещение ЦТ грузов в вагоне:\n"
-      f"Продольное смещение:\n"
-      f"0.5*{platform.floor_length} - ({' + '.join(f'{box.weight}*{box.coords_of_cg[0]}' for box in boxes)})/ {boxes_weight}")
+print("1. Смещение ЦТ грузов в вагоне:")
+print("Продольное смещение:")
+l_c_shipments_calculation = f"0.5*{platform.floor_length} - ({' + '.join(f'{box.weight}*{box.coords_of_cg[0]}' for box in boxes)})/ {boxes_weight}"
+print(l_c_shipments_calculation)
 print("1. Смещение ЦТ грузов в вагоне:", round(l_c_shipments), "мм <", max_permissible_l_c_shipments, "мм")
 is_longitudinal_bias_permissible = l_c_shipments < max_permissible_l_c_shipments
 print("Смещение:", "допустимо" if is_longitudinal_bias_permissible else "НЕ ДОПУСТИМО!")
