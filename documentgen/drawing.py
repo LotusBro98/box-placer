@@ -86,11 +86,29 @@ class DrawBox:
         draw_marker(scene, pos)
         draw_label(scene, pos, f"ЦТгр{self.id}")
 
-    def draw_dimension(self, scene: "Scene"):
+    def draw_dimension_side(self, scene: "Scene"):
         center = scene.project(self.pos)
         dims = scene.project_size(self.dimensions)
         left = center[0] - dims[0] / 2
         right = center[0] + dims[0] / 2
+        size = int((right - left) / scene.scale * 1000)
+        height = scene.project(np.array([0, 0, self.pos[2] + 2]))[1]
+
+        line = draw.Line(left, height, right, height, stroke=DrawColor.PLATFORM_COLOR, stroke_width=1)
+        scene.drawing.append(line)
+
+        draw_label(scene, [center[0], height], f"{size}", DrawColor.PLATFORM_COLOR, style="normal")
+
+    def draw_dimension(self, scene: "Scene"):
+        draw_fns = {
+            Projection.SIDE: self.draw_dimension_side,
+            Projection.BACK: None,
+            Projection.FRONT: None,
+            Projection.TOP: None,
+        }
+        draw_fn = draw_fns[scene.projection]
+        if draw_fn is not None:
+            draw_fn(scene)
 
     def draw_box(self, scene: "Scene"):
         pos = scene.project(self.pos)
@@ -102,6 +120,7 @@ class DrawBox:
     def draw(self, scene: "Scene"):
         self.draw_box(scene)
         self.draw_center(scene)
+        self.draw_dimension(scene)
 
 
 class Platform:
