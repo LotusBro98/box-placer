@@ -156,7 +156,7 @@ def get_order_validation_report(request, pk: int):
     boxes = [shipment.to_box for shipment in shipments_data]
     carriage = order.carriage.to_base_model
     # Output of drawer:
-    file = generate_pdf_report_bytes(boxes=boxes, carriage=carriage)
+    file = generate_pdf_report_bytes(order=order, boxes=boxes, carriage=carriage)
     file_to_send = ContentFile(file)
     response = HttpResponse(file_to_send, 'application/x-pdf')
     response['Content-Length'] = file_to_send.size
